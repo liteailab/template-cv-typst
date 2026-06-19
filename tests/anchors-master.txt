@@ -1,0 +1,13 @@
+# Ordered anchors expected in the rendered master CV (case-insensitive).
+Alex Doe
+alex@example.com
+Experience
+Acme Cloud
+Bright Labs
+Nimbus Analytics
+Startup Forge
+PixelWorks Agency
+DataNest
+Skills
+Education
+Technical University
