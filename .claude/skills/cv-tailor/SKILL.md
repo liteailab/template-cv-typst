@@ -11,7 +11,12 @@ the most relevant real experience — **without inventing anything**.
 ## Steps
 
 1. **Read inputs.** Load `master-cv.yaml` and the job description (text, file, or
-   URL the user provides). If a URL, fetch it.
+   URL the user provides). If a URL, fetch it — this works for most public
+   postings (company career pages, Greenhouse/Lever/Ashby, etc.). But if the
+   fetch returns a login wall, an anti-bot/challenge page, or an empty/near-empty
+   body (common for LinkedIn, Indeed, Glassdoor), do **not** tailor against that
+   junk: tell the user the link isn't fetchable and ask them to paste the job
+   description text (or save the page and give you the file).
 
 2. **Identify Company and Role** for naming. If either is ambiguous, ask the user.
 
@@ -37,16 +42,24 @@ the most relevant real experience — **without inventing anything**.
 7. **Compile the PDF:**
    `typst compile --input data=output/{Company}-{Role}-{Name}/cv.yaml --font-path ./assets/fonts resume.typ output/{Company}-{Role}-{Name}/{Company}-{Role}-{Name}.pdf`
 
-8. **ATS text-extraction verification.** Write an ordered anchors file (contact
-   email, each section heading, each selected employer/role — top to bottom) and
-   run `./.venv/bin/python scripts/ats.py check <pdf> <anchors-file>`. If it
-   FAILS (missing/out-of-order), the layout scrambled the text — investigate and
-   re-render before delivering. Keep the anchors file in the output folder.
+8. **ATS text-extraction verification.** Read the generated PDF back with the
+   Read tool and confirm — top to bottom — that the contact email, every section
+   heading, and every selected employer/role appear in the order you wrote them.
+   If anything is missing or out of order, the layout scrambled the text —
+   investigate and re-render before delivering.
 
-9. **ATS keyword-coverage report.** Write the job's keywords (one per line) to a
-   file and run `./.venv/bin/python scripts/ats.py coverage <pdf> <keywords-file>`.
-   Review MISSING keywords: if the user genuinely has that experience, surface it
-   (truthfully); otherwise leave it out. Never fabricate to raise coverage.
+9. **ATS keyword-coverage report.** From the job's key requirements/keywords
+   (step 3), check which appear in the PDF text you just read, and report
+   coverage as present vs. missing. Review MISSING keywords: if the user
+   genuinely has that experience, surface it (truthfully); otherwise leave it
+   out. Never fabricate to raise coverage.
+
+   *Optional deterministic check.* For a model-independent verification (catches
+   font/glyph extraction corruption that visual reading can miss), and only if
+   `pypdf` is installed (`pip install pypdf`), write an ordered anchors file and a
+   one-keyword-per-line file into the output folder and run
+   `python3 scripts/ats.py check <pdf> <anchors-file>` and
+   `python3 scripts/ats.py coverage <pdf> <keywords-file>`.
 
 10. **Write `job.md`** in the output folder: the job description, a short note on
     what you tailored (what you surfaced/dropped/rephrased), and the

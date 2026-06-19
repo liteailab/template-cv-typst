@@ -17,12 +17,8 @@ This compiles `resume.typ` to `resume.pdf` using the bundled fonts.
 Your CV lives as structured data in `master-cv.yaml` (the single source of
 truth). Generated, job-tailored CVs land in `output/` (gitignored).
 
-### One-time setup
-
-```bash
-python3 -m venv .venv
-./.venv/bin/pip install pypdf   # used for ATS text-extraction checks
-```
+No setup beyond installing Typst — Claude does all the parsing, tailoring, and
+ATS checking. Just clone, open in Claude Code, and follow the steps below.
 
 ### Import your CV (one-time)
 
@@ -49,11 +45,22 @@ typst compile --input data=output/<folder>/cv.yaml --font-path ./assets/fonts \
 
 ### ATS checks
 
-`cv-tailor` verifies the generated PDF with `scripts/ats.py`:
-`check` confirms the contact email, section headings, and job titles extract in
-order; `coverage` reports which job keywords appear. Note: no tool can certify
-against every applicant tracking system — these checks make the output robustly
-parseable and flag problems.
+`cv-tailor` verifies the generated PDF itself: Claude reads the PDF back, confirms
+the contact email, section headings, and job titles appear in order, and reports
+which job keywords are present. No setup required.
+
+For a deterministic, model-independent check, the optional helper
+[`scripts/ats.py`](scripts/ats.py) does the same via text extraction. It needs
+`pypdf` (`pip install pypdf`) and catches font/glyph extraction corruption that
+visual reading can miss:
+
+```bash
+python3 scripts/ats.py check    <pdf> <anchors-file>   # headings/employers in order
+python3 scripts/ats.py coverage <pdf> <keywords-file>  # which job keywords appear
+```
+
+Note: no tool can certify against every applicant tracking system — these checks
+make the output robustly parseable and flag problems.
 
 ## Choosing a font
 

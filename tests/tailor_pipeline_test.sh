@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Verifies the mechanical pipeline cv-tailor depends on: a tailored cv.yaml
-# compiles to a named PDF in output/, and ATS check + coverage run against it.
+# compiles to a named PDF in output/. The optional scripts/ats.py check runs
+# only when pypdf is installed (Claude does ATS checks natively otherwise).
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -34,13 +35,17 @@ EOF
 typst compile --input data="$dir/cv.yaml" --font-path ./assets/fonts resume.typ "$pdf" \
   && [ -f "$pdf" ] && ok "tailored cv.yaml compiles to named PDF" || no "tailored cv.yaml compiles to named PDF"
 
-printf 'Alex Doe\nExperience\nNimbus Analytics\n' > "$dir/anchors.txt"
-./.venv/bin/python scripts/ats.py check "$pdf" "$dir/anchors.txt" >/dev/null \
-  && ok "ATS check passes on tailored PDF" || no "ATS check passes on tailored PDF"
+if python3 -c 'import pypdf' 2>/dev/null; then
+  printf 'Alex Doe\nExperience\nNimbus Analytics\n' > "$dir/anchors.txt"
+  python3 scripts/ats.py check "$pdf" "$dir/anchors.txt" >/dev/null \
+    && ok "ATS check passes on tailored PDF" || no "ATS check passes on tailored PDF"
 
-printf 'Go\nKafka\nRust\n' > "$dir/keywords.txt"
-cov="$(./.venv/bin/python scripts/ats.py coverage "$pdf" "$dir/keywords.txt")"
-printf '%s' "$cov" | grep -qF "MISSING: Rust" && ok "coverage reports missing keyword" || no "coverage reports missing keyword"
+  printf 'Go\nKafka\nRust\n' > "$dir/keywords.txt"
+  cov="$(python3 scripts/ats.py coverage "$pdf" "$dir/keywords.txt")"
+  printf '%s' "$cov" | grep -qF "MISSING: Rust" && ok "coverage reports missing keyword" || no "coverage reports missing keyword"
+else
+  echo "SKIP: pypdf not installed (optional scripts/ats.py check)"
+fi
 
 rm -rf "$dir"
 if [ $fail -eq 0 ]; then echo "ALL TESTS PASSED"; else echo "SOME TESTS FAILED"; fi
