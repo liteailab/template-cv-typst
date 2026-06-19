@@ -4,6 +4,55 @@ A minimal, single-page CV/resume template built with [Typst](https://typst.app/)
 
 Inter and Roboto fonts are bundled locally under [`assets/fonts/`](assets/fonts/), so builds are reproducible without installing anything system-wide.
 
+## Installing Typst
+
+The only requirement is [Typst](https://github.com/typst/typst) on your `PATH`.
+Pick whichever method below fits your platform, then verify with:
+
+```bash
+typst --version
+```
+
+### Linux (incl. WSL2)
+
+Any one of:
+
+```bash
+# Snap (most distros)
+sudo snap install typst
+
+# Cargo (if you have the Rust toolchain)
+cargo install --locked typst-cli
+
+# Distro package managers (check https://repology.org/project/typst/versions)
+sudo pacman -S typst        # Arch
+brew install typst          # Homebrew on Linux
+```
+
+Or install the prebuilt binary manually (works everywhere, including WSL2):
+
+```bash
+ARCH=$(uname -m)            # x86_64 or aarch64
+curl -fsSL "https://github.com/typst/typst/releases/latest/download/typst-${ARCH}-unknown-linux-musl.tar.xz" \
+  | tar -xJ
+install -Dm755 "typst-${ARCH}-unknown-linux-musl/typst" ~/.local/bin/typst
+```
+
+Make sure `~/.local/bin` is on your `PATH`.
+
+### Windows 11
+
+Using the built-in WinGet package manager (PowerShell or Terminal):
+
+```powershell
+winget install --id Typst.Typst
+```
+
+Alternatives: `scoop install typst` (Scoop), or download the prebuilt
+`typst-x86_64-pc-windows-msvc.zip` from the
+[releases page](https://github.com/typst/typst/releases/), extract it, and add
+the folder to your `PATH`.
+
 ## Build
 
 ```bash
@@ -75,7 +124,3 @@ Available fonts: `Inter`, `Roboto`.
 ## Editing
 
 Put your content in [`resume.typ`](resume.typ). The layout and styling live in [`template.typ`](template.typ).
-
-## Requirements
-
-- [Typst](https://github.com/typst/typst) installed and on your `PATH`.
